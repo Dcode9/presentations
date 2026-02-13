@@ -192,20 +192,18 @@
 
     <div class="info-box">
       <strong>How it works:</strong><br>
-      1. Enter your presentation topic and Cerebras API key<br>
+      1. Enter your presentation topic below<br>
       2. Cerebras AI generates structured slide content (titles, bullets, colors, animations)<br>
-      3. Pollinations AI generates images for each slide<br>
+      3. Pollinations AI (imagen-2) generates images for each slide<br>
       4. Everything is assembled into a valid <code>.pptx</code> file (ZIP of XML + images)<br>
       5. You can see every step in the live log below<br>
       <br>
-      <strong>Get your Cerebras API key:</strong> <a href="https://cloud.cerebras.ai/" target="_blank" style="color:#58a6ff">cloud.cerebras.ai</a>
+      <strong>API keys are configured via environment variables:</strong><br>
+      <code>CEREBRAS_API_KEY</code> — Required (<a href="https://cloud.cerebras.ai/" target="_blank" style="color:#58a6ff">cloud.cerebras.ai</a>)<br>
+      <code>POLLINATIONS_API_KEY</code> — Optional (<a href="https://enter.pollinations.ai/" target="_blank" style="color:#58a6ff">enter.pollinations.ai</a>)
     </div>
 
     <form id="generateForm">
-      <div class="form-group">
-        <label for="apiKey">Cerebras API Key</label>
-        <input type="password" id="apiKey" placeholder="csk-..." required>
-      </div>
       <div class="form-group">
         <label for="topic">Presentation Topic</label>
         <textarea id="topic" placeholder="e.g., Introduction to Machine Learning - cover fundamentals, types of ML, real-world applications, and future trends" required></textarea>
@@ -240,9 +238,8 @@
       e.preventDefault();
 
       const topic = document.getElementById('topic').value.trim();
-      const apiKey = document.getElementById('apiKey').value.trim();
 
-      if (!topic || !apiKey) return;
+      if (!topic) return;
 
       // Reset UI
       logBody.innerHTML = '';
@@ -258,7 +255,7 @@
         const res = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic, apiKey }),
+          body: JSON.stringify({ topic }),
         });
 
         if (!res.ok) {

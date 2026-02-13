@@ -24,7 +24,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 /**
  * POST /api/generate
  *
- * Body: { topic: string, apiKey: string }
+ * Body: { topic: string }
+ *
+ * API keys are read from environment variables:
+ *   CEREBRAS_API_KEY - Required for text generation
+ *   POLLINATIONS_API_KEY - Optional for image generation
  *
  * Returns the PPTX file as a downloadable ZIP.
  * Streams progress via SSE-style logging in a separate endpoint.
@@ -37,13 +41,13 @@ const jobs = new Map();
  * POST /api/generate - Start a presentation generation job
  */
 app.post('/api/generate', (req, res) => {
-  const { topic, apiKey } = req.body;
+  const { topic } = req.body;
 
   if (!topic || !topic.trim()) {
     return res.status(400).json({ error: 'Topic is required' });
   }
-  if (!apiKey || !apiKey.trim()) {
-    return res.status(400).json({ error: 'Cerebras API key is required' });
+  if (!process.env.CEREBRAS_API_KEY) {
+    return res.status(500).json({ error: 'CEREBRAS_API_KEY environment variable is not set' });
   }
 
   const jobId = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
@@ -58,7 +62,7 @@ app.post('/api/generate', (req, res) => {
   jobs.set(jobId, job);
 
   // Start generation in background
-  runGeneration(job, apiKey.trim()).catch((err) => {
+  runGeneration(job).catch((err) => {
     job.status = 'error';
     job.error = err.message;
     job.logs.push(`❌ Error: ${err.message}`);
@@ -130,7 +134,7 @@ app.get('/api/download/:jobId', (req, res) => {
 /**
  * Run the full generation pipeline.
  */
-async function runGeneration(job, apiKey) {
+async function runGeneration(job) {
   const log = (msg) => {
     const timestamp = new Date().toISOString().substring(11, 23);
     const entry = `[${timestamp}] ${msg}`;
@@ -147,7 +151,7 @@ async function runGeneration(job, apiKey) {
     log('  STEP 1: Generate Slide Content (Cerebras API)');
     log('═══════════════════════════════════════');
 
-    const slideData = await generateSlideContent(apiKey, job.topic, log);
+    const slideData = await generateSlideContent(job.topic, log);
     const slides = slideData.slides;
 
     log('');
@@ -237,6 +241,8 @@ async function runGeneration(job, apiKey) {
 app.listen(PORT, () => {
   console.log(`🚀 AI Presentation Generator running at http://localhost:${PORT}`);
   console.log(`   Open in your browser to start creating presentations!`);
+  console.log(`   CEREBRAS_API_KEY: ${process.env.CEREBRAS_API_KEY ? 'set ✓' : 'NOT SET ✗'}`);
+  console.log(`   POLLINATIONS_API_KEY: ${process.env.POLLINATIONS_API_KEY ? 'set ✓' : 'not set (optional)'}`);
 });
 
 module.exports = app;
