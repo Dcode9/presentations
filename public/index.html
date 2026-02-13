@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Presentation Generator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #58a6ff;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #8b949e;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #c9d1d9;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    input[type="text"], input[type="password"], textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #c9d1d9;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #58a6ff;
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    button {
+      background: #238636;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    button:hover:not(:disabled) {
+      background: #2ea043;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .log-container {
+      margin-top: 24px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .log-header {
+      background: #161b22;
+      padding: 10px 14px;
+      border-bottom: 1px solid #30363d;
+      font-weight: 600;
+      font-size: 14px;
+      color: #58a6ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .log-body {
+      padding: 12px 14px;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      max-height: 500px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .log-body .log-line {
+      padding: 1px 0;
+    }
+    .log-body .log-line.error {
+      color: #f85149;
+    }
+    .log-body .log-line.success {
+      color: #3fb950;
+    }
+    .log-body .log-line.separator {
+      color: #6e7681;
+    }
+    .download-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: #161b22;
+      border: 1px solid #238636;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .download-section a {
+      display: inline-block;
+      background: #238636;
+      color: #fff;
+      padding: 12px 32px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+    .download-section a:hover {
+      background: #2ea043;
+    }
+    .download-section p {
+      margin-bottom: 12px;
+      color: #3fb950;
+      font-weight: 600;
+    }
+    .info-box {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #8b949e;
+      line-height: 1.6;
+    }
+    .info-box code {
+      background: #0d1117;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #c9d1d9;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-badge.running {
+      background: #1f2937;
+      color: #f0c040;
+      animation: pulse 1.5s infinite;
+    }
+    .status-badge.done {
+      background: #0f2918;
+      color: #3fb950;
+    }
+    .status-badge.error {
+      background: #2d1116;
+      color: #f85149;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 AI Presentation Generator</h1>
+    <p class="subtitle">Generate PowerPoint presentations using Cerebras AI + Pollinations images</p>
+
+    <div class="info-box">
+      <strong>How it works:</strong><br>
+      1. Enter your presentation topic and Cerebras API key<br>
+      2. Cerebras AI generates structured slide content (titles, bullets, colors, animations)<br>
+      3. Pollinations AI generates images for each slide<br>
+      4. Everything is assembled into a valid <code>.pptx</code> file (ZIP of XML + images)<br>
+      5. You can see every step in the live log below<br>
+      <br>
+      <strong>Get your Cerebras API key:</strong> <a href="https://cloud.cerebras.ai/" target="_blank" style="color:#58a6ff">cloud.cerebras.ai</a>
+    </div>
+
+    <form id="generateForm">
+      <div class="form-group">
+        <label for="apiKey">Cerebras API Key</label>
+        <input type="password" id="apiKey" placeholder="csk-..." required>
+      </div>
+      <div class="form-group">
+        <label for="topic">Presentation Topic</label>
+        <textarea id="topic" placeholder="e.g., Introduction to Machine Learning - cover fundamentals, types of ML, real-world applications, and future trends" required></textarea>
+      </div>
+      <button type="submit" id="generateBtn">🚀 Generate Presentation</button>
+    </form>
+
+    <div id="logSection" class="log-container" style="display:none">
+      <div class="log-header">
+        <span>📋 Generation Log</span>
+        <span id="statusBadge" class="status-badge running">Running...</span>
+      </div>
+      <div class="log-body" id="logBody"></div>
+    </div>
+
+    <div id="downloadSection" class="download-section" style="display:none">
+      <p>✅ Presentation generated successfully!</p>
+      <a id="downloadLink" href="#">📥 Download .pptx File</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('generateForm');
+    const logSection = document.getElementById('logSection');
+    const logBody = document.getElementById('logBody');
+    const statusBadge = document.getElementById('statusBadge');
+    const downloadSection = document.getElementById('downloadSection');
+    const downloadLink = document.getElementById('downloadLink');
+    const generateBtn = document.getElementById('generateBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const topic = document.getElementById('topic').value.trim();
+      const apiKey = document.getElementById('apiKey').value.trim();
+
+      if (!topic || !apiKey) return;
+
+      // Reset UI
+      logBody.innerHTML = '';
+      logSection.style.display = 'block';
+      downloadSection.style.display = 'none';
+      statusBadge.textContent = 'Running...';
+      statusBadge.className = 'status-badge running';
+      generateBtn.disabled = true;
+      generateBtn.textContent = '⏳ Generating...';
+
+      try {
+        // Start generation job
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic, apiKey }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to start generation');
+        }
+
+        const { jobId } = await res.json();
+
+        // Connect to SSE for progress
+        const evtSource = new EventSource(`/api/progress/${jobId}`);
+
+        evtSource.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+
+          if (data.type === 'log') {
+            appendLog(data.message);
+          } else if (data.type === 'done') {
+            evtSource.close();
+            statusBadge.textContent = 'Complete';
+            statusBadge.className = 'status-badge done';
+            downloadSection.style.display = 'block';
+            downloadLink.href = `/api/download/${jobId}`;
+            generateBtn.disabled = false;
+            generateBtn.textContent = '🚀 Generate Another';
+          } else if (data.type === 'error') {
+            evtSource.close();
+            statusBadge.textContent = 'Error';
+            statusBadge.className = 'status-badge error';
+            appendLog(`❌ ${data.message}`, 'error');
+            generateBtn.disabled = false;
+            generateBtn.textContent = '🚀 Try Again';
+          }
+        };
+
+        evtSource.onerror = () => {
+          evtSource.close();
+          statusBadge.textContent = 'Disconnected';
+          statusBadge.className = 'status-badge error';
+          generateBtn.disabled = false;
+          generateBtn.textContent = '🚀 Try Again';
+        };
+
+      } catch (err) {
+        appendLog(`❌ ${err.message}`, 'error');
+        statusBadge.textContent = 'Error';
+        statusBadge.className = 'status-badge error';
+        generateBtn.disabled = false;
+        generateBtn.textContent = '🚀 Try Again';
+      }
+    });
+
+    function appendLog(message, type = '') {
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      if (type === 'error' || message.includes('❌')) line.className += ' error';
+      else if (message.includes('✅') || message.includes('✓')) line.className += ' success';
+      else if (message.includes('═══')) line.className += ' separator';
+      line.textContent = message;
+      logBody.appendChild(line);
+      logBody.scrollTop = logBody.scrollHeight;
+    }
+  </script>
+</body>
+</html>
