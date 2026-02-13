@@ -245,11 +245,14 @@ app.use('/api', (req, res) => {
   res.status(404).json({ error: 'API endpoint not found' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 AI Presentation Generator running at http://localhost:${PORT}`);
-  console.log(`   Open in your browser to start creating presentations!`);
-  console.log(`   CEREBRAS_API_KEY: ${process.env.CEREBRAS_API_KEY ? 'set ✓' : 'NOT SET ✗'}`);
-  console.log(`   POLLINATIONS_API_KEY: ${process.env.POLLINATIONS_API_KEY ? 'set ✓' : 'not set (optional)'}`);
-});
+// Only start the server when run directly (not when imported for Vercel)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 AI Presentation Generator running at http://localhost:${PORT}`);
+    console.log(`   Open in your browser to start creating presentations!`);
+    console.log(`   CEREBRAS_API_KEY: ${process.env.CEREBRAS_API_KEY ? 'set ✓' : 'NOT SET ✗'}`);
+    console.log(`   POLLINATIONS_API_KEY: ${process.env.POLLINATIONS_API_KEY ? 'set ✓' : 'not set (optional)'}`);
+  });
+}
 
 module.exports = app;
