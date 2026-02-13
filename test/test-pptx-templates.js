@@ -224,7 +224,7 @@ test('appXml includes slide count', () => {
 // --- PPTX Builder ---
 console.log('\nPPTX Builder:');
 
-test('buildPptx returns an archiver stream', (done) => {
+test('buildPptx returns an archiver stream', () => {
   const slides = [
     { title: 'Slide 1', bullets: ['Bullet A'], bgColor: 'FFFFFF', titleColor: '000000', bodyColor: '333333', animation: 'fadeIn' },
     { title: 'Slide 2', bullets: ['Bullet B'], bgColor: '1A1A2E', titleColor: 'FFFFFF', bodyColor: 'CCCCCC', animation: 'flyIn' },
