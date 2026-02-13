@@ -259,8 +259,16 @@
         });
 
         if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || 'Failed to start generation');
+          let errorMsg = `Server error (${res.status})`;
+          const clonedRes = res.clone();
+          try {
+            const err = await res.json();
+            errorMsg = err.error || errorMsg;
+          } catch (_) {
+            const text = await clonedRes.text().catch(() => '');
+            if (text) errorMsg = text.substring(0, 200);
+          }
+          throw new Error(errorMsg);
         }
 
         const { jobId } = await res.json();

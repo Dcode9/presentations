@@ -238,6 +238,13 @@ async function runGeneration(job) {
   }
 }
 
+/**
+ * Catch-all for unmatched /api/* routes — return JSON 404 instead of HTML.
+ */
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 AI Presentation Generator running at http://localhost:${PORT}`);
   console.log(`   Open in your browser to start creating presentations!`);
